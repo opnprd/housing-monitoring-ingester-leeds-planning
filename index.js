@@ -10,8 +10,10 @@ async function processPlanningData() {
   // if (process.env.DOWNLOAD !== undefined) await downloadCaseData().catch(console.error);
 
   await getCasesFromLocalCache()
+    .then(slice(10))
     .then(writeDataToFile('events.json', { pretty: true }))
     .then(addEvents)
+    .then(console.log)
     .catch(console.error);
 }
 // geometry(planRef).then(JSON.stringify).then(console.log);
