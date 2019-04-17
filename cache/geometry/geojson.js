@@ -1,3 +1,5 @@
+const debug = require('debug')('leedsPlanning/cache/geometry/geojson');
+
 function makeFeature(data) {
   if (data === undefined) return {};
   return {
@@ -6,6 +8,27 @@ function makeFeature(data) {
     geometry: makeGeometry(data),
   };
 }
+
+function makeGeometry(data) {
+  const { rings } = data.geometry;
+  if (data === undefined) return {};
+  return rings.length === 2 ? convertRingsToMultiPolygon(rings) : convertRingsToPolygon(rings);
+}
+
+function convertRingsToPolygon(rings) {
+  return {
+    type: 'Polygon',
+    coordinates: rings,
+  }
+}
+
+function convertRingsToMultiPolygon(rings) {
+  return {
+    type: 'MultiPolygon',
+    coordinates: rings.map(x => [x]),
+  }
+}
+
 
 function getAttributes(data) {
   if (data === undefined) return {};
@@ -24,14 +47,6 @@ function getAttributes(data) {
       return acc;
     }, {});
   return attributes;
-}
-
-function makeGeometry(data) {
-  if (data === undefined) return {};
-  return {
-    type: 'MultiPolygon',
-    coordinates: data.geometry.rings.map(x => [x]),
-  };
 }
 
 module.exports = {
