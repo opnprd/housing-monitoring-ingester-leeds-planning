@@ -5,15 +5,7 @@ const debug = require('debug')('leedsPlanning/cache/dataset');
 const { filterCases, simplifyData } = require('./filters');
 const { getCsvDataAsStream } = require('../../services/leedsOpenData');
 
-async function pipeStreamToFile(stream, filename) {
-  const fileStream = fs.createWriteStream(filename);
-  const watcher = new Promise((resolve, reject) => {
-    fileStream.on('finish', resolve);
-    stream.on('error', reject);
-    stream.pipe(fileStream);
-  });
-  return watcher;
-}
+const { pipeStreamToFile } = require('../../utils/stream');
 
 /**
  * Guidance availavble at
