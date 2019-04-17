@@ -4,6 +4,7 @@ const debug = require('debug')('leedsPlanning/cache/geometry');
 
 const { getPlanPolygon } = require('../../services/leedsArcGIS');
 const { makeFeature, makeGeometry } = require('./geojson');
+const { sleep } = require('../../utils');
 
 /**
  * Create filepath for reference
@@ -11,6 +12,13 @@ const { makeFeature, makeGeometry } = require('./geojson');
  */
 function featureFilePath(ref) {
   return path.resolve(`${__dirname}/data/${ref.replace(/\//g, '_')}.json`);
+}
+
+const rateTimeout = 2000;
+let rateLimit = Promise.resolve();
+
+function setRateLimit() {
+  rateLimit = sleep(rateTimeout);
 }
 
 class Feature {
@@ -21,8 +29,9 @@ class Feature {
 
   async downloadToCache() {
     if (this.cached) return;
-    debug(`Downloading feature ${this.ref}`);
     try {
+      await rateLimit;
+      debug(`Downloading feature ${this.ref}`);
       const arcGisData = await getPlanPolygon(this.ref).then((res) => res.data.features[0]);
       await new Promise((resolve, reject) => {
         fs.writeFile(this.filename, JSON.stringify(arcGisData, null, 2), {}, (err) => {
@@ -33,6 +42,7 @@ class Feature {
           }
         });
       });
+      setRateLimit();
     } catch(error) {
       console.error(error);
     }
