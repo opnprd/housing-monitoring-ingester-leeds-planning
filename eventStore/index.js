@@ -1,7 +1,12 @@
-const debug = require('debug')('planningPerms/eventStore');
+const debug = require('debug')('leedsPlanning/eventStore');
 const axios = require('axios');
+const fs = require('fs');
 
 const eventEndpoint = 'http://localhost:8000/events';
+const geometryEndpoint = (id) => `http://localhost:8000/event/${id}/geometry`;
+
+const { Feature } = require('../cache/geometry');
+
 const { sleep } = require('../utils');
 
 async function createEvent(eventData) {
@@ -13,6 +18,14 @@ async function createEvent(eventData) {
   return result.data;
 }
 
+async function addEventGeometry(id, geometryData) {
+  const result = await axios({
+    method: 'put',
+    url: geometryEndpoint(id),
+    data: geometryData,
+  });
+}
+
 async function addEvents(data) {
   const output = [];
   const errors = [];
@@ -21,17 +34,19 @@ async function addEvents(data) {
     const element = data[i];
     try {
       const record = await createEvent(element);
-      process.stdout.write('.');
       output.push(record);
+      debug(`Attempting to read geometry for ${record.ref}`);
+      const feature = new Feature(record.ref);
+      const geojson = await feature.asGeometry(record.ref);
+      await addEventGeometry(record.eventId, geojson);
     } catch(error) {
       debug(`Error creating event ${element}`);
+      process.exit();
       console.error(error.message);
       errors.push(element);
     }
   }
 
-  process.stdout.write('\n\nFinished adding events\n')
-  debug(errors);
   return output;
 }
 
