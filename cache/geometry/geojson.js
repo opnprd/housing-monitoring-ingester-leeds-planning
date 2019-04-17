@@ -1,5 +1,22 @@
 const debug = require('debug')('leedsPlanning/cache/geometry/geojson');
 
+function fixRing(ring) {
+  const newRing = removeDuplicates(ring);
+  return newRing;
+}
+
+function removeDuplicates(ring) {
+  const coordHash = (c) => c.toString();
+
+  function filterDuplicates(coord, index, orig) {
+    if (index === 0 || index === orig.length-1 ) return true;
+    return !orig.slice(0, index-1).map(coordHash).includes(coordHash(coord));;
+  }
+  const filteredRing = ring.filter(filterDuplicates);
+  if ( ring.length !== filteredRing.length) debug(`Reduced ring from ${ring.length} to ${filteredRing.length}`);
+  return filteredRing;
+}
+
 function makeFeature(data) {
   if (data === undefined) return {};
   return {
@@ -10,9 +27,9 @@ function makeFeature(data) {
 }
 
 function makeGeometry(data) {
-  const { rings } = data.geometry;
+  const rings = data.geometry.rings.map(fixRing);
   if (data === undefined) return {};
-  return rings.length === 2 ? convertRingsToMultiPolygon(rings) : convertRingsToPolygon(rings);
+  return rings.length >= 2 ? convertRingsToMultiPolygon(rings) : convertRingsToPolygon(rings);
 }
 
 function convertRingsToPolygon(rings) {

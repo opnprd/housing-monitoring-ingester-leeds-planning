@@ -14,6 +14,30 @@ async function createEvent(eventData) {
   return result.data;
 }
 
+async function findEvent(ref) {
+  const eventEndpoint = `http://localhost:8000/events?ref=${ref}`;
+
+  debug(`Finding event`);
+
+  const result = await axios({
+    method: 'get',
+    url: eventEndpoint,
+  });
+  return result.data;
+}
+
+async function getEvent(id) {
+  const eventEndpoint = `http://localhost:8000/event/${id}`;
+
+  debug(`Finding event`);
+
+  const result = await axios({
+    method: 'get',
+    url: eventEndpoint,
+  });
+  return result.data;
+}
+
 async function addEventGeometry(id, geometryData) {
   const geometryEndpoint = (id) => `http://localhost:8000/event/${id}/geometry`;
 
@@ -29,4 +53,6 @@ async function addEventGeometry(id, geometryData) {
 module.exports = {
   createEvent,
   addEventGeometry,
+  findEvent,
+  getEvent,
 };

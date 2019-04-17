@@ -29,7 +29,7 @@ async function addEvents(data) {
       debug(`Can't add geometry to event with ID ${record.eventId}`);
       console.error(error.message);
       errors.push(element);
-      continue;
+      break; // Break on error - alternative is continue...
     }
   }
 
