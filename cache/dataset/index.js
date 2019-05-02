@@ -2,7 +2,7 @@ const fs = require('fs');
 const parse = require('csv-parse');
 const debug = require('debug')('leedsPlanning/cache/dataset');
 
-const { filterCases, simplifyData } = require('./filters');
+const { filterCases, simplifyData, sortByDate } = require('./filters');
 const { getCsvDataAsStream } = require('../../services/leedsOpenData');
 
 const { pipeStreamToFile } = require('../../utils/stream');
@@ -47,7 +47,7 @@ class Dataset {
         }
       });
       fileStream.pipe(parser);
-    }).then(filterCases).then(simplifyData);
+    }).then(filterCases).then(simplifyData).then(sortByDate);
 
     return watcher;
   }
