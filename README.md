@@ -1,3 +1,24 @@
+# Leeds Planning Data Ingester
 
+> Ingester for Housing Monitoring event store
 
-https://publicaccess.leeds.gov.uk/arcgis/rest/services/IDOXPA1/MapServer/9/query?f=json&where=REFVAL='14/04270/OT'&returnGeometry=true&outFields=*&outSR=4326
+See https://github.com/opnprd/housing-monitoring-eventstore
+
+## Setup
+
+```shell
+npm install
+```
+
+## Operation
+
+```shell
+node . 
+```
+
+Further debug information can be set by setting the DEBUG environment variable on the command line as follows:
+
+```shell
+DEBUG=leedsPlanning/* node .
+```
+
